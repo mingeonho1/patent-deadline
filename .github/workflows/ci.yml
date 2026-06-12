@@ -28,6 +28,12 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          # 빌드 타임 env 검증(next.config.ts → src/lib/env.ts) 통과용 플레이스홀더.
+          # 빌드는 env의 존재·형식만 확인하고 Supabase에 접속하지 않는다.
+          # 실제 키는 Vercel 프로젝트 env에만 존재한다.
+          SUPABASE_URL: https://ci-placeholder.supabase.co
+          SUPABASE_SECRET_KEY: ci-placeholder-not-a-real-key
 
       - name: Dead code check (warning only)
         run: pnpm knip || echo "::warning::knip이 죽은 코드를 발견했습니다. reviewer 검수 시 확인하세요."

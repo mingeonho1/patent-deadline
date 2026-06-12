@@ -51,6 +51,16 @@ const eslintConfig = defineConfig([
       "max-lines": "off",
     },
   },
+  {
+    // 자동화 스크립트(CLI 도구)는 단일 파일에 헬퍼가 모이는 성격상 길이 계열 규칙만 완화.
+    // 타입·품질 규칙은 그대로 적용된다 (제품 코드 src/는 여전히 전체 게이트 대상).
+    files: ["scripts/**"],
+    rules: {
+      "max-lines": "off",
+      "max-lines-per-function": "off",
+      "max-params": "off",
+    },
+  },
   // eslint-config-next 기본 ignore 재정의
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);

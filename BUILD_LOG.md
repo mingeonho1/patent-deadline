@@ -2,6 +2,27 @@
 
 ## Decisions
 
+### [배포준비] Vercel Analytics: @vercel/analytics 공식 패키지 채택
+
+- **선택**: `@vercel/analytics` 패키지 + `<Analytics />` 컴포넌트 + `track("signup_submitted")` 커스텀 이벤트
+- **대안**: Plausible / 직접 fetch로 이벤트 수집
+- **이유**: Vercel 배포 환경과 네이티브 통합. Vercel 환경 밖에서는 라이브러리 자체가 no-op으로 동작해 로컬 dev에서 에러 없음. shipping 스킬에서 요구하는 `signup_submitted` 이벤트 수집을 가장 적은 코드로 충족. payment 이벤트는 PLAN.md에 결제 기능이 없으므로 생략.
+- **트레이드오프**: Vercel 종속성 추가. 타 플랫폼 이전 시 Analytics 부분만 교체 필요.
+
+### [배포준비] metadataBase: NEXT_PUBLIC_APP_URL 환경변수로 OG URL 결정
+
+- **선택**: `metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://patent-deadline.vercel.app")`
+- **대안**: 하드코딩 / 빌드 타임 env 검증 추가
+- **이유**: Vercel 배포 URL은 프리뷰/프로덕션이 다르다. 환경변수로 주입하되, 미설정 시 프로덕션 URL을 fallback으로 써서 소셜 OG 이미지 경로가 깨지지 않도록 한다. NEXT*PUBLIC* 접두사는 클라이언트 번들에 노출되어도 무방한 공개 URL이므로 시크릿 아님.
+- **트레이드오프**: fallback URL이 실제 배포 URL과 다를 경우 OG 이미지 경로 오동작 가능. Vercel에 `NEXT_PUBLIC_APP_URL`을 등록하면 해결.
+
+### [배포준비] OG 이미지 / favicon: next/og ImageResponse edge runtime 채택
+
+- **선택**: `src/app/opengraph-image.tsx`(1200×630) + `src/app/icon.tsx`(32×32) — 모두 `next/og` ImageResponse, `runtime = "edge"`
+- **대안**: 정적 PNG 파일 배치 (public/og.png, public/favicon.ico)
+- **이유**: 외부 이미지 에디터·파일 없이 코드만으로 생성. Next.js App Router 파일 컨벤션(`opengraph-image.tsx`, `icon.tsx`)을 따르면 메타태그 자동 주입. edge runtime이라 빌드 타임 정적 생성 대신 요청 시 생성되므로 빌드 비용 없음.
+- **트레이드오프**: edge runtime 사용 페이지는 정적 생성 비활성화 경고(`⚠ Using edge runtime on a page currently disables static generation for that page`) — OG/favicon 라우트 자체는 페이지가 아니라 메타 라우트이므로 실 서비스 영향 없음.
+
 ### [T1] 날짜 표현: UTC 고정 + 정수 y/m/d 분해
 
 - **선택**: `Date.UTC(y, m, d, 12, 0, 0)` + UTC getter(`getUTCFullYear`, `getUTCMonth`, `getUTCDate`)로 날짜 단위 연산

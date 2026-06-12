@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@vercel/analytics";
 import { joinWaitlist } from "@/features/waitlist/actions";
 
 type FormState = "idle" | "loading" | "error" | "success";
@@ -19,6 +20,7 @@ export function WaitlistForm() {
       const result = await joinWaitlist(email);
 
       if (result.ok) {
+        track("signup_submitted");
         setState("success");
       } else {
         setErrorMessage(result.error);

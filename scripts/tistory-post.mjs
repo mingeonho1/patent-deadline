@@ -102,17 +102,23 @@ async function switchToMarkdownMode(page) {
 }
 
 async function fillBody(page, body) {
-  // 티스토리 에디터에는 CodeMirror가 2개(HTML용/마크다운용) 존재 — 보이는 인스턴스에 주입
-  await page.waitForSelector(".CodeMirror:visible", { timeout: 30_000 });
-  await page.evaluate((text) => {
+  // 주의: cm.setValue()는 화면에만 반영되고 티스토리 내부 상태와 동기화되지 않아
+  // 발행 시 빈 본문이 저장됨 → 실제 키보드 입력 경로(insertText)로 주입한다.
+  const editor = page.locator(".CodeMirror:visible").first();
+  await editor.waitFor({ timeout: 30_000 });
+  await editor.click();
+  await page.keyboard.insertText(body);
+
+  // 주입 검증: 에디터 상태에 본문이 실제로 들어갔는지 길이로 확인
+  const injected = await page.evaluate(() => {
     const editors = [...document.querySelectorAll(".CodeMirror")];
-    const visible =
-      editors.find((el) => el.offsetParent !== null) ?? editors.at(-1);
-    const cm = visible?.CodeMirror;
-    if (!cm) throw new Error("보이는 CodeMirror 인스턴스를 찾지 못함");
-    cm.setValue(text);
-    cm.refresh?.();
-  }, body);
+    const visible = editors.find((el) => el.offsetParent !== null);
+    return visible?.CodeMirror?.getValue()?.length ?? 0;
+  });
+  if (injected < body.length * 0.9) {
+    throw new Error(`본문 주입 불완전 (${injected}/${body.length}자) — 발행하지 마세요`);
+  }
+  console.log(`✍️  본문 주입 확인: ${injected}자`);
 }
 
 async function openPublishLayer(page) {

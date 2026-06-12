@@ -79,6 +79,20 @@
 - 이유: 클라이언트 컴포넌트에서 new Date()는 로컬 시간이지만 UTC getter로 날짜를 추출하면 KST 00:00~09:00 사이에 전날이 된다. +9h 보정으로 KST 기준 날짜를 일관되게 추출.
 - 트레이드오프: 하드코딩된 +9 offset. 한국 서비스 전용이므로 허용.
 
+### [T11] Supabase 중복 이메일 멱등 처리: 에러코드 23505 무시
+
+- **선택**: insert 후 PostgreSQL error code 23505(unique_violation)를 조용히 무시
+- **대안**: upsert with ignoreDuplicates: true
+- **이유**: insert는 실제 삽입과 중복을 코드 수준에서 명확히 구분한다. ignoreDuplicates upsert는 "무조건 성공"처럼 보여 의도가 덜 명확하다.
+- **트레이드오프**: error code 문자열 비교에 의존 — PostgREST가 항상 "23505"를 반환한다는 전제.
+
+### [T11] @supabase/supabase-js 설치
+
+- **선택**: 공식 JS 클라이언트 @supabase/supabase-js 추가
+- **대안**: fetch 직접 호출로 PostgREST API 사용
+- **이유**: 인증 헤더 관리, 에러 타입화, insert/upsert 편의 API. 50줄 이내 직접 구현이 불가능한 수준의 부가 기능을 제공.
+- **트레이드오프**: 번들 크기 증가. 단, storage.ts는 서버 전용이므로 클라이언트 번들에 포함되지 않음.
+
 ---
 
 ## 공휴일 테이블 (2025~2027, RULES.md §7 인간 대조용)
@@ -162,6 +176,14 @@
 ---
 
 ## Stuck & Solved
+
+### reviewer FAIL: env 검증 지연 + 폼 loading 고착 (수정 1·2)
+
+- **증상 1**: `SUPABASE_URL="" pnpm build`가 exit 0으로 성공 — env 검증이 첫 server action 호출 시점으로 지연되어 빌드 타임 오류 미감지.
+- **증상 2**: server action에서 env.ts 모듈 로드 중 throw가 발생하면 joinWaitlist의 try/catch가 아닌 모듈 초기화 단계에서 터짐. waitlist-form.tsx가 이 reject를 받아도 try/catch가 없어 loading 상태에 영구 고착.
+- **해결 1**: next.config.ts에 `import "./src/lib/env"` 추가. next build 시 config 로드 단계에서 zod parse가 실행되어 env 미설정 시 즉시 exit 1 + 문제 변수명 표시(값 미노출).
+- **해결 2**: waitlist-form.tsx의 `await joinWaitlist(email)` 호출을 try/catch로 감싸고, catch 시 `"잠시 후 다시 시도해주세요."` + error 상태로 전환하여 재시도 가능하도록 처리.
+- **검증**: `SUPABASE_URL="" pnpm build` → exit 1 + ZodError(SUPABASE_URL 키 이름만 표시) / 정상 env `pnpm build` → exit 0 / `pnpm check` 44 passed / `npx knip` 0건.
 
 ### noUncheckedIndexedAccess 타입 에러 (T4 timeline.test.ts)
 

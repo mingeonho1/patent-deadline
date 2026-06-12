@@ -15,12 +15,17 @@ export function WaitlistForm() {
     setState("loading");
     setErrorMessage("");
 
-    const result = await joinWaitlist(email);
+    try {
+      const result = await joinWaitlist(email);
 
-    if (result.ok) {
-      setState("success");
-    } else {
-      setErrorMessage(result.error);
+      if (result.ok) {
+        setState("success");
+      } else {
+        setErrorMessage(result.error);
+        setState("error");
+      }
+    } catch {
+      setErrorMessage("잠시 후 다시 시도해주세요.");
       setState("error");
     }
   }

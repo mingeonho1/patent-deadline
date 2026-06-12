@@ -20,23 +20,23 @@ claude   # Claude Code 실행
 
 ## 구조
 
-| 경로 | 역할 |
-|---|---|
-| `CLAUDE.md` | 철칙 5개 + 포인터 (항상 로딩) |
-| `PLAN.md` | 이번 빌드의 범위 정의 (lead가 생성) |
-| `BUILD_LOG.md` | 의사결정/삽질 로그 — 블로그 글의 원재료 |
-| `.claude/agents/` | lead(기획) · builder(구현) · reviewer(검수) |
+| 경로              | 역할                                                                           |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `CLAUDE.md`       | 철칙 5개 + 포인터 (항상 로딩)                                                  |
+| `PLAN.md`         | 이번 빌드의 범위 정의 (lead가 생성)                                            |
+| `BUILD_LOG.md`    | 의사결정/삽질 로그 — 블로그 글의 원재료                                        |
+| `.claude/agents/` | lead(기획) · builder(구현) · reviewer(검수)                                    |
 | `.claude/skills/` | architecture · conventions · shipping · log-decision · write-post · blog-style |
-| `.claude/hooks/` | guard(위험 명령 차단) · format(자동 포맷) · verify(종료 전 품질 게이트) |
+| `.claude/hooks/`  | guard(위험 명령 차단) · format(자동 포맷) · verify(종료 전 품질 게이트)        |
 
 ## 주말 운영 타임라인
 
-| 시간 | 작업 |
-|---|---|
-| 금 저녁 | 아이디어 확정 → lead가 PLAN.md 생성 → Non-goals 승인 |
-| 토 | builder 구현 (태스크당 `pnpm check` 통과 필수) → reviewer 1차 검수 |
-| 일 오전 | reviewer `SHIP IT` → shipping 스킬 절차로 Vercel 배포 + 계측 |
-| 일 오후 | write-post 스킬로 블로그 글 → 발행 → 아래 표 갱신 |
+| 시간    | 작업                                                               |
+| ------- | ------------------------------------------------------------------ |
+| 금 저녁 | 아이디어 확정 → lead가 PLAN.md 생성 → Non-goals 승인               |
+| 토      | builder 구현 (태스크당 `pnpm check` 통과 필수) → reviewer 1차 검수 |
+| 일 오전 | reviewer `SHIP IT` → shipping 스킬 절차로 Vercel 배포 + 계측       |
+| 일 오후 | write-post 스킬로 블로그 글 → 발행 → 아래 표 갱신                  |
 
 **킬 규칙**: 배포 2주 내 결제/사용 신호 0이면 유지보수 중단 (리포는 공개 유지).
 
@@ -48,6 +48,6 @@ claude   # Claude Code 실행
 
 ## 빌드 결과
 
-| 주차 | 제품 | 링크 | 검증 지표 | 결과 |
-|---|---|---|---|---|
-| — | — | — | — | — |
+| 주차     | 제품             | 링크                               | 검증 지표               | 결과        |
+| -------- | ---------------- | ---------------------------------- | ----------------------- | ----------- |
+| 2026-W24 | 특허 기한 계산기 | https://patent-deadline.vercel.app | 이메일 대기명단 등록 수 | (추후 기입) |

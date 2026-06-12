@@ -222,4 +222,19 @@
 
 ## Ship
 
+### [금 18시] CI 빌드용 플레이스홀더 env 주입
+
+- **선택**: ci.yml의 Build 단계에만 `SUPABASE_URL=https://ci-placeholder.supabase.co`, `SUPABASE_SECRET_KEY=ci-placeholder-not-a-real-key` 주입
+- **대안**: CI에서 env 검증 스킵(CI=true 분기) / env 검증을 런타임으로 되돌리기
+- **이유**: 빌드 타임 fail-fast는 Vercel 배포 보호용 안전장치다. CI 빌드는 Supabase에 접속하지 않으므로 형식만 유효한 가짜 값으로 충분하고, 검증 코드에 분기를 넣으면 보호가 약해진다.
+- **트레이드오프**: 플레이스홀더가 진짜 키처럼 보일 수 있어 주석으로 명시.
+
+### 배포 기록
+
+- 프로덕션 URL: **https://patent-deadline.vercel.app** (Vercel 프로젝트: mingeonho1s-projects/patent-deadline, GitHub 연동 자동 배포)
+- 성공 지표 (PLAN.md): 이메일 대기명단 등록 수 — Vercel Analytics `signup_submitted` 이벤트로 계측
+- 체크 상태: pnpm check 44개 그린 / knip 0건 / reviewer SHIP IT (본 빌드 2라운드 + 태스크 11 2라운드 + 마감재 2라운드)
+- ⚠️ 반영 대기: Vercel 프로젝트 env에 SUPABASE_URL/SUPABASE_SECRET_KEY 등록 + 최신 커밋 push 후 자동 배포되어야 실제 제품이 라이브됨 (등록 전까지 Vercel 빌드는 의도적으로 실패)
+- 배포 후 스모크 테스트 체크리스트: 랜딩 진입 → 계산 1회(T1: 2026-03-10, 4개월 → 2026-07-10 금) → 대기명단 제출 → Supabase waitlist 행 확인 → 모바일 뷰포트 1회
+
 ## Retro

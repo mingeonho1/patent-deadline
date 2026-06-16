@@ -2,6 +2,13 @@
 
 ## Decisions
 
+### [공유인프라] Supabase 단일 프로젝트 공유 — waitlist 공유 테이블(source 구분) + SITE_URL 자동분기
+
+- **선택**: 여러 제품이 Supabase 프로젝트 1개를 공유. `waitlist` 테이블에 `source text not null` 컬럼을 두고 제품명(`"patent-deadline"`)으로 행을 구분. insert에 `source: SOURCE` 추가, select에 `.eq("source", SOURCE)` 필터 추가. `SITE_URL` env를 optional로 env.ts에 추가하고, `siteUrl()` 헬퍼로 `SITE_URL → VERCEL_PROJECT_PRODUCTION_URL → localhost:3000` 순 fallback. `layout.tsx`의 `metadataBase`를 `siteUrl()`로 교체.
+- **대안**: 제품별 테이블 분리 (prefix 방식) / 제품별 Supabase 프로젝트 분리
+- **이유**: 단일 프로젝트 공유는 Supabase 무료 티어(프로젝트 2개 제한)를 아끼고 관리 콘솔이 단순해진다. source 컬럼 방식은 테이블 수가 늘어나지 않고 career-vault 등 다른 레포와 DDL 정의를 완전히 공유할 수 있다.
+- **트레이드오프**: insert/select 모두에 source 필터를 빠뜨리면 타 제품 데이터와 교차 오염 가능. `SOURCE` 상수를 `storage.ts` 최상단에 고정해 누락을 방지.
+
 ### [배포준비] Vercel Analytics: @vercel/analytics 공식 패키지 채택
 
 - **선택**: `@vercel/analytics` 패키지 + `<Analytics />` 컴포넌트 + `track("signup_submitted")` 커스텀 이벤트
